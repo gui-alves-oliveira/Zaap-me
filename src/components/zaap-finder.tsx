@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 
 const zaaps = [
   { x: -77, y: -73, name: "Vilarejo Soterrado" },
@@ -41,16 +42,18 @@ const zaaps = [
 ];
 
 export function ZaapFinder() {
-  const [target, setTarget] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
   const [nearestZap, setNearestZap] = useState<string | null>(null);
 
-  function handleSearchNearByZap() {
+  const { handleSubmit, register, reset } = useForm({
+    defaultValues: {
+        x: 0,
+        y: 0
+    }
+  })
+
+  function handleSearchNearByZap(target: { x: number, y: number }) {
     let nearestZaap = null;
     let minDistance = Infinity;
-
-    if (!target) {
-      return;
-    }
 
     for (const zaap of zaaps) {
       const distance = Math.sqrt(
@@ -72,8 +75,9 @@ export function ZaapFinder() {
 
   function handleNewSearch() {
     setNearestZap(null)
-    setTarget({ x: 0, y: 0 })
+    reset()
   }
+
 
   return (
     <div>
@@ -83,32 +87,26 @@ export function ZaapFinder() {
             <button onClick={handleNewSearch} className="h-12 bg-purple-500 px-4 rounded text-white w-full">Fazer nova busca</button>
         </div>
       ) : (
-        <>
-          <div className="mb-6 space-x-4">
-            <span className="text-2xl text-white font-bold">X: </span>
-            <input
-              className="h-12 rounded bg-neutral-800 border border-neutral-700 px-4 text-white text-2xl"
-              type="number"
-              value={target.x}
-              onChange={(e) =>
-                setTarget({ y: target.y, x: Number.parseInt(e.target.value) })
-              }
-            />
-            <span className="text-2xl text-white font-bold">Y: </span>
-            <input
-              className="h-12 rounded bg-neutral-800 border border-neutral-700 px-4 text-white text-2xl"
-              type="number"
-              value={target.y}
-              onChange={(e) =>
-                setTarget({ x: target.x, y: Number.parseInt(e.target.value) })
-              }
-            />
-          </div>
+          <form onSubmit={handleSubmit(handleSearchNearByZap)} >
+            <div className="mb-6 space-x-4">
+                <span className="text-2xl text-white font-bold">X: </span>
+                <input
+                  className="h-12 rounded bg-neutral-800 border border-neutral-700 px-4 text-white text-2xl"
+                  type="text"
+                  {...register('x')}
+                />
+                <span className="text-2xl text-white font-bold">Y: </span>
+                <input
+                  className="h-12 rounded bg-neutral-800 border border-neutral-700 px-4 text-white text-2xl"
+                  type="text"
+                  {...register('y')}
+                />
+            </div>
 
-          <button className="h-12 bg-purple-500 px-4 rounded text-white w-full" onClick={handleSearchNearByZap}>
-            Procurar zap mais próximo
-          </button>
-        </>
+            <button className="h-12  bg-purple-500 px-4 rounded text-white w-full" >
+                Procurar zap mais próximo
+            </button>
+          </form>
       )}
     </div>
   );
